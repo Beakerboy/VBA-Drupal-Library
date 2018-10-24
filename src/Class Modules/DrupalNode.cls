@@ -62,6 +62,6 @@ End Property
                             
 '******************************METHODS*****************************************
 Public Function GetFields()
-
+    GetFields = Array(sTitle, lUid, bStatus)
 End Function
                                                                     
