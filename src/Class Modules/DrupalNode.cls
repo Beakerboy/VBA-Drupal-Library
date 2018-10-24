@@ -24,19 +24,26 @@ Private Sub Class_Initialize()
     
     Set sTitle = New DrupalField
     sTitle.DataType = "string"
+    sTitle.Length = 255
+            
     Set lUid As DrupalField
     lUid.Datatype = "integer"
+                
     Set bStatus As DrupalField
     bStatus.Datatype = "boolean"
     bStatus.Value = True
+                    
     Set dCreated as DrupalField
     Set cChanged as DrupalField
     Set bPromote as DrupalField
+                                
     bPromote.Datatype = "boolean"
     pPromote.Value = True
+                                
     Set bSticky as DrupalField
     bSticky.Datatype = "boolean"
     bSticky.Value = False
+                                    
     Set cRevisionTimestamp as DrupalField
     Set lRevisionUid as DrupalField
     Set sRevisionLog as DrupalField
