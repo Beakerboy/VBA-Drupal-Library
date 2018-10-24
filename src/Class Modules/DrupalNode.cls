@@ -61,3 +61,7 @@ Public Property Get Title() As String
 End Property
                             
 '******************************METHODS*****************************************
+Public Function GetFields()
+
+End Function
+                                                                    
