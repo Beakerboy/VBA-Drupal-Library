@@ -1,13 +1,23 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "DrupalField"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
 Private sType As String
 Private iLength As Integer
 Private vValue As Variant
 Private sFieldName As String
-Private vExtraValue
-
+Private oForeignEntity
+'***************************CONSTRUCTOR****************************************
 Private Sub Class_Initialize()
-    vExtraValue = 0
+
 End Sub
 
+'***************************LET PROPERTIES*************************************
 Public Property Let DataType(sValue As String)
     sType = sValue
 End Property
@@ -24,6 +34,11 @@ Public Property Let FieldName(sValue As String)
     sFieldName = sValue
 End Property
 
+Public Property Set ForeignEntity(oEntity)
+    Set oForeignEntity = oEntity
+End Property
+
+'***************************Get PROPERTIES*************************************
 Public Property Get Value()
     Value = vValue
 End Property
@@ -40,6 +55,7 @@ Public Property Get FieldName() As String
     FieldName = sFieldName
 End Property
 
-Public Property Get ExtraValue()
-    ExtraValue = vExtraValue
+Public Property Get ForeignEntity()
+    Set ForeignEntity = oForeignEntity
 End Property
+
