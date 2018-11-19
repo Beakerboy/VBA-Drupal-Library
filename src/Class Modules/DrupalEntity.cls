@@ -14,19 +14,26 @@ Attribute VB_Exposed = False
 '*********************************VARIABLES************************************
 Private sTable As String        'The table name
 Private oId As DrupalField      'Primary Key
-Private oLabel As DrupalField    'The entity name
+Private oLabel As DrupalField   'The entity name
+
+Private dFields As Dictionary   'An array of entity fields. This currently only
+                                'supports base fields.
 
 '***************************CONSTRUCTOR****************************************
-Private Sub Class_Initialize()
+Private Sub class_initialize()
+    Set dFields = New Dictionary
     InitializeFields
 End Sub
 
 Private Sub InitializeFields()
     Set oId = New DrupalField
     InitializeField oId, "integer", "id"
-
+    oId.IdField = True
+    'AddField (oId)
+    
     Set oLabel = New DrupalField
     InitializeField oLabel, "string", "name", 50
+    'AddField (oLabel)
 End Sub
 
 Public Sub InitializeField(ByRef oField As DrupalField, sType As String, sName As String, Optional iLength As Integer = 0)
@@ -35,9 +42,17 @@ Public Sub InitializeField(ByRef oField As DrupalField, sType As String, sName A
     If iLength <> 0 Then oField.Length = iLength
 End Sub
 
+Public Sub CreateField(sType As String, sName As String, Optional iLength As Integer = 0)
+    Dim MyField As New DrupalField
+    MyField.DataType = sType
+    MyField.FieldName = sName
+    If iLength <> 0 Then MyField.Length = iLength
+    AddField MyField
+End Sub
+
 '***************************LET PROPERTIES*************************************
 Public Property Let Label(sValue As String)
-    oLabel.Value = sValue
+    oLabel.Value = Left(sValue, oLabel.Length - CountCharsToEscape(sValue))
 End Property
 
 Public Property Let Table(sValue As String)
@@ -77,6 +92,18 @@ Public Property Get IdField() As DrupalField
     Set IdField = oId
 End Property
 '******************************METHODS*****************************************
+Public Sub SetValue(sFieldName As String, vValue)
+    dFields(sFieldName).Value = vValue
+End Sub
+
+Public Function GetValue(sFieldName As String)
+    GetValue = dFields(sFieldName).Value
+End Function
+
+Public Sub SetForeignKeyValue(sFieldName As String, vValue As Variant)
+    dFields(sFieldName).ForeignEntity.Label = vValue
+End Sub
+
 Public Sub CreateFromArray(oEntity, ArrayOfValues)
     FieldList = oEntity.GetFields
     numfields = UBound(FieldList)
@@ -87,3 +114,38 @@ Public Sub CreateFromArray(oEntity, ArrayOfValues)
         Item.Value = ArrayOfValues(counter)
     Next counter
 End Sub
+
+Public Sub AddField(ByVal oField As DrupalField)
+    Dim FieldName As String
+    FieldName = oField.FieldName
+    Set dFields(FieldName) = oField
+End Sub
+
+Public Function CreateForeignKey(FieldName As String, ForeignEntity As DrupalEntity)
+    Dim NewField As New DrupalField
+    NewField.QuickLoad "entity_reference", FieldName
+    Set NewField.ForeignEntity = ForeignEntity
+    AddField NewField
+End Function
+
+'return All Fields except the ID field
+Public Function GetFields() As Variant
+    Dim Number_Fields As Long
+    Number_Fields = dFields.count
+    
+    Dim FieldArray() As DrupalField
+    ReDim FieldArray(Number_Fields)
+    Set FieldArray(0) = oLabel
+    Dim key As Variant
+    Dim i As Long
+    i = 1
+    For Each key In dFields.Keys
+        Set FieldArray(i) = dFields(key)
+        i = i + 1
+    Next key
+    GetFields = FieldArray
+End Function
+
+Public Function foo()
+
+End Function

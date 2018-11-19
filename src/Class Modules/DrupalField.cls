@@ -11,10 +11,11 @@ Private sType As String
 Private iLength As Integer
 Private vValue As Variant
 Private sFieldName As String
-Private oForeignEntity
+Private oForeignEntity As DrupalEntity
+Private bIdField As Boolean
 '***************************CONSTRUCTOR****************************************
-Private Sub Class_Initialize()
-
+Private Sub class_initialize()
+    bIdField = False
 End Sub
 
 '***************************LET PROPERTIES*************************************
@@ -32,6 +33,10 @@ End Property
 
 Public Property Let FieldName(sValue As String)
     sFieldName = sValue
+End Property
+
+Public Property Let IdField(bValue As Boolean)
+    bIdField = bValue
 End Property
 
 Public Property Set ForeignEntity(oEntity)
@@ -55,7 +60,17 @@ Public Property Get FieldName() As String
     FieldName = sFieldName
 End Property
 
-Public Property Get ForeignEntity()
+Public Property Get ForeignEntity() As DrupalEntity
     Set ForeignEntity = oForeignEntity
 End Property
+
+Public Property Get IdField() As Boolean
+    IdField = bIdField
+End Property
+
+Public Sub QuickLoad(DataType, FieldName, Optional Length As Integer = 50)
+    sFieldName = FieldName
+    sType = DataType
+    iLength = Length
+End Sub
 

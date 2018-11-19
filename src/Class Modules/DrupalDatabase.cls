@@ -15,7 +15,7 @@ Option Explicit
 Private MySQLDatabase As SQLDatabase
 
 '***************************CONSTRUCTOR****************************************
-Private Sub Class_Initialize()
+Private Sub class_initialize()
     Set MySQLDatabase = New SQLDatabase
 End Sub
 
@@ -36,14 +36,15 @@ Public Property Let Password(sValue As String)
     MySQLDatabase.Password = sValue
 End Property
 
-Public Property Let TestMode(bValue As Boolean)
-    MySQLDatabase.TestMode = bValue
+Public Property Set Recordset(MyRecordset)
+    Set MySQLDatabase.Recordset = MyRecordset
 End Property
+
 
 '******************************METHODS*****************************************
 
 'Create a new record in the database using values from the class object
-Public Sub Insert(ByRef oEntity)
+Public Sub Insert(ByRef oEntity As DrupalEntity)
     Dim inSQL As SQLInsert
     Set inSQL = New SQLInsert
     inSQL.Table = oEntity.Table
@@ -97,13 +98,14 @@ Private Function getFieldValues(aFields)
                 Set SeSQL = New SQLSelect
                 SeSQL.Fields = Array(Item.ForeignEntity.IdField.FieldName)
                 SeSQL.Table = Item.ForeignEntity.Table
-                SeSQL.addWhere Item.ForeignEntity.LabelField.FieldName, "=", str(Item.ForeignEntity.Label)
-                Dim MySubselect As SQLSubselect
-                Set MySubselect = New SQLSubselect
-                MySubselect.SelectAs = Item.FieldName
-                Set MySubselect.SelectSQL = SeSQL
-                MySubselect.SelectAs = Item.FieldName
-                ReturnArray(counter) = MySubselect.ToString
+                SeSQL.AddWhere Item.ForeignEntity.LabelField.FieldName, "=", str(Item.ForeignEntity.Label)
+                'Dim MySubselect As SQLSubselect
+                'Set MySubselect = New SQLSubselect
+                'Set MySubselect.SelectSQL = SeSQL
+                'MySubselect.SelectAs = Item.FieldName
+                Dim Interfaced As iSQLQuery
+                Set Interfaced = SeSQL
+                ReturnArray(counter) = "(" & Interfaced.ToString & ")"
             End If
         Else
             ReturnArray(counter) = Item.Value
@@ -113,15 +115,15 @@ Private Function getFieldValues(aFields)
 End Function
 
 'Using the provided object's .Label property, look up the primary key ID value. For cases where
-'The name is a unique identifier.
-Public Sub GetIdFromName(ByRef oEntity)
+'the name is a unique identifier.
+Public Sub GetIdFromName(ByRef oEntity As DrupalEntity)
     Dim SQL As SQLSelect
     Set SQL = New SQLSelect
     SQL.Table = oEntity.Table
     Dim IdField As DrupalField
     Set IdField = oEntity.IdField
     SQL.Fields = Array(IdField.FieldName)
-    SQL.addWhere oEntity.LabelField.FieldName, "=", str(oEntity.Label)
+    SQL.AddWhere oEntity.LabelField.FieldName, "=", str(oEntity.Label)
     oEntity.ID = MySQLDatabase.Execute(SQL, IdField.FieldName)
 End Sub
 
@@ -131,12 +133,12 @@ Private Function MaxDelta(sTable As String, lEntityId As Long) As Long
     Set SQL = New SQLSelect
     SQL.Table = sTable
     SQL.Fields = Array("CASE WHEN max(delta) IS NULL THEN -1 ELSE max(delta) END AS maxdelta")
-    SQL.addWhere "entity_id", "=", lEntityId
+    SQL.AddWhere "entity_id", "=", lEntityId
     MaxDelta = MySQLDatabase.Execute(SQL, "maxdelta")
 End Function
 
 'Add a link from an entity to another, through an entity_reference
-Public Sub JoinEntities(ByVal oEntity, ByVal oField)
+Public Sub JoinEntities(ByVal oEntity As DrupalEntity, ByVal oField)
     Dim sBundle As String
     sBundle = oEntity.Table
     
@@ -165,21 +167,29 @@ Public Sub JoinEntities(ByVal oEntity, ByVal oField)
 End Sub
 
 'Update the VBA object with values from the database using the id field
-Public Sub RefreshObject(ByRef oEntity)
+Public Sub RefreshObject(ByRef oEntity As DrupalEntity)
     CreateFromId oEntity, oEntity.ID
 End Sub
 
 'Update values in the database using values in the VBA Object
-Public Sub Update(oEntity)
+Public Sub Update(oEntity As DrupalEntity)
+    Dim MyUpdate As New SQLUpdate
+    MyUpdate.Table = oEntity.Table
     
+    Dim aFields As Variant
+    aFields = oEntity.GetFields()
+    MyUpdate.Fields = GetFieldNames(aFields)
+    MyUpdate.Values = getFieldValues(aFields)
+    MyUpdate.AddWhere oEntity.IdField.FieldName, "=", oEntity.ID
+    MySQLDatabase.Execute MyUpdate
 End Sub
 
-'Create a object with values from the database, using sa primary key
-Public Sub CreateFromId(ByRef oEntity, lId As Long)
+'Create a object with values from the database, using a primary key
+Public Sub CreateFromId(ByRef oEntity As DrupalEntity, lId As Long)
     Set sSQL = New SQLSelect
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
-    sSQL.addWhere oEntity.IdField.FieldName, "=", lId
+    sSQL.AddWhere oEntity.IdField.FieldName, "=", lId
     ArrayOfValues = MyDatabase.Execute(sSQL)
     FieldList = oEntity.GetFields
     numfields = UBound(FieldList)
@@ -190,3 +200,4 @@ Public Sub CreateFromId(ByRef oEntity, lId As Long)
         Item.Value = ArrayOfValues(counter)
     Next counter
 End Sub
+
