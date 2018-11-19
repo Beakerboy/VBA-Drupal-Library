@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+Implements iDrupalEntity
 '***************************DRUPAL ENTITY CLASS********************************
 'Provides a parent class for Drupal Entities.
 'Provides Shared Methods that can be used by all Entities
@@ -20,7 +21,7 @@ Private dFields As Dictionary   'An array of entity fields. This currently only
                                 'supports base fields.
 
 '***************************CONSTRUCTOR****************************************
-Private Sub class_initialize()
+Private Sub Class_Initialize()
     Set dFields = New Dictionary
     InitializeFields
 End Sub
@@ -146,6 +147,31 @@ Public Function GetFields() As Variant
     GetFields = FieldArray
 End Function
 
-Public Function foo()
+'***************************Interface Methods**********************************
+Public Property Get iDrupalEntity_Table()
+    iDrupalEntity_Table = sTable
+End Property
 
+Public Property Get iDrupalEntity_ID() As Long
+    iDrupalEntity_ID = oId.Value
+End Property
+
+Public Property Let iDrupalEntity_ID(lValue As Long)
+    oId.Value = lValue
+End Property
+
+Public Property Get iDrupalEntity_IdField()
+    iDrupalEntity_IdField = oId
+End Property
+
+Public Property Get iDrupalEntity_LabelField()
+    iDrupalEntity_LabelField = oLabel
+End Property
+
+Public Property Get iDrupalEntity_Label()
+    iDrupalEntity_Label = oEntity.Label
+End Property
+
+Public Function iDrupalEntity_GetFields()
+    iDrupalEntity_GetFields = GetFields()
 End Function
