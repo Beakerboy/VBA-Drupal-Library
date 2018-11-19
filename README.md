@@ -50,7 +50,7 @@ oField.Length = 50
 ```
 
 ### Entity Class
-The DrupalEntity class is a parent class for any other Entities. Your Entities will extend this class to add additional fields.
+The DrupalEntity class is a parent class for any other Entities, but can be used as-is. Custom Entities can extend this class and add custom properties and methods.
 
 ### Node Class
 The library contains a representation of Drupal's Node Entity as an example of how to extend the DrupalEntity
