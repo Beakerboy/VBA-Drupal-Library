@@ -14,7 +14,7 @@ Features
   Setup
 -----
 
-Import the files into a spreadsheet using Microsoft Visual Basic for Applications. These scripts also require the [VBA-SQL-Library](https://github.com/Beakerboy/VBA-SQL-Library) for generalized SQL Query Objects.
+Import the files into a spreadsheet using Microsoft Visual Basic for Applications. These scripts also require the [VBA-SQL-Library](https://github.com/Beakerboy/VBA-SQL-Library) for generalized SQL Query Objects. Also the Microsoft Scripting Runtime project must be enabled.
  
  Security
 -----
