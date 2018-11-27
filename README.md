@@ -46,7 +46,7 @@ The DrupaField represents a column in the database. It contains all the meta-inf
  * .FieldName = __name__
  * .IdField = __boolean__
  * .TargetEntity __iDrupalEntity__
- * .Create __type__, __name__, __length__
+ * .Create __type__, __name__, _length_
  
 #### Example
 ```vba
