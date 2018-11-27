@@ -6,7 +6,7 @@ Attribute VB_Name = "DrupalDatabase"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 '***************************DRUPAL DATABASE CLASS******************************
 'Provides methods for manupulating Drupal Entities with VBA
 '
@@ -15,8 +15,8 @@ Option Explicit
 Private MySQLDatabase As SQLDatabase
 
 '***************************CONSTRUCTOR****************************************
-Private Sub class_initialize()
-    Set MySQLDatabase = New SQLDatabase
+Private Sub Class_Initialize()
+    Set MySQLDatabase = Create_SQLDatabase
 End Sub
 
 '***************************LET PROPERTIES*************************************
@@ -36,24 +36,29 @@ Public Property Let Password(sValue As String)
     MySQLDatabase.Password = sValue
 End Property
 
-Public Property Set Recordset(MyRecordset)
+Public Property Set Recordset(MyRecordset As iSQLRecordset)
     Set MySQLDatabase.Recordset = MyRecordset
+End Property
+
+Public Property Set Connection(MyConnection As iSQLConnection)
+    Set MySQLDatabase.Connection = MyConnection
 End Property
 
 
 '******************************METHODS*****************************************
 
 'Create a new record in the database using values from the class object
-Public Sub Insert(ByRef oEntity As DrupalEntity)
+Public Sub Insert(ByRef oEntity As iDrupalEntity)
     Dim inSQL As SQLInsert
-    Set inSQL = New SQLInsert
-    inSQL.Table = oEntity.Table
-    
+    Set inSQL = Create_SQLInsert
     Dim aFields As Variant
     aFields = oEntity.GetFields()
-    inSQL.Fields = GetFieldNames(aFields)
-    inSQL.Values = getFieldValues(aFields)
-    oEntity.ID = MySQLDatabase.InsertGetNewId(inSQL)
+    With inSQL
+        .Table = oEntity.Table
+        .Fields = GetFieldNames(aFields)
+        .Values = getFieldValues(aFields)
+    End With
+    oEntity.ID = MySQLDatabase.InsertGetNewId(inSQL, oEntity.IdField.FieldName)
 End Sub
 
 'Create an array of field names from the array of DrupalField objects
@@ -85,8 +90,18 @@ Private Function getFieldValues(aFields)
     counter = 0
     For counter = 0 To numfields
         Set Item = aFields(counter)
-        If Item.DataType = "string" Then
-            ReturnArray(counter) = str(Item.Value)
+        Dim DataType As String
+        DataType = Item.DataType
+        If DataType = "string" Or DataType = "password" Then
+            ReturnArray(counter) = Str(Item.Value)
+        ElseIf DataType = "boolean" Then
+            Dim FieldValue As String
+            If Item.Value Then
+                FieldValue = "TRUE"
+            Else
+                FieldValue = "FALSE"
+            End If
+            ReturnArray(counter) = FieldValue
         ElseIf Item.DataType = "entity_reference" Then
             If Item.Value > 0 Then
                 'id is set, use it instead of the value
@@ -95,17 +110,16 @@ Private Function getFieldValues(aFields)
             Else
                 'Create a simple subselect
                 Dim SeSQL As SQLSelect
-                Set SeSQL = New SQLSelect
-                SeSQL.Fields = Array(Item.ForeignEntity.IdField.FieldName)
-                SeSQL.Table = Item.ForeignEntity.Table
-                SeSQL.AddWhere Item.ForeignEntity.LabelField.FieldName, "=", str(Item.ForeignEntity.Label)
-                'Dim MySubselect As SQLSubselect
-                'Set MySubselect = New SQLSubselect
-                'Set MySubselect.SelectSQL = SeSQL
-                'MySubselect.SelectAs = Item.FieldName
+                Set SeSQL = Create_SQLSelect
+                With SeSQL
+                    .Fields = Array(Item.TargetEntity.IdField.FieldName)
+                    .Table = Item.TargetEntity.Table
+                    .AddWhere Item.TargetEntity.LabelField.FieldName, Str(Item.TargetEntity.Label)
+                End With
+
                 Dim Interfaced As iSQLQuery
                 Set Interfaced = SeSQL
-                ReturnArray(counter) = "(" & Interfaced.ToString & ")"
+                ReturnArray(counter) = "(" & Interfaced.toString & ")"
             End If
         Else
             ReturnArray(counter) = Item.Value
@@ -116,29 +130,33 @@ End Function
 
 'Using the provided object's .Label property, look up the primary key ID value. For cases where
 'the name is a unique identifier.
-Public Sub GetIdFromName(ByRef oEntity As DrupalEntity)
+Public Sub GetIdFromName(ByRef oEntity As iDrupalEntity)
     Dim SQL As SQLSelect
-    Set SQL = New SQLSelect
-    SQL.Table = oEntity.Table
+    Set SQL = Create_SQLSelect
     Dim IdField As DrupalField
     Set IdField = oEntity.IdField
-    SQL.Fields = Array(IdField.FieldName)
-    SQL.AddWhere oEntity.LabelField.FieldName, "=", str(oEntity.Label)
+    With SQL
+        .Table = oEntity.Table
+        .Fields = Array(IdField.FieldName)
+        .AddWhere oEntity.LabelField.FieldName, Str(oEntity.Label)
+    End With
     oEntity.ID = MySQLDatabase.Execute(SQL, IdField.FieldName)
 End Sub
 
 'Look up the largest delta value that currently exists in the database for a given entity_id
 Private Function MaxDelta(sTable As String, lEntityId As Long) As Long
     Dim SQL As SQLSelect
-    Set SQL = New SQLSelect
-    SQL.Table = sTable
-    SQL.Fields = Array("CASE WHEN max(delta) IS NULL THEN -1 ELSE max(delta) END AS maxdelta")
-    SQL.AddWhere "entity_id", "=", lEntityId
+    Set SQL = Create_SQLSelect
+    With SQL
+        .Table = sTable
+        .AddField "CASE WHEN max(delta) IS NULL THEN -1 ELSE max(delta) END", "maxdelta"
+        .AddWhere "entity_id", lEntityId
+    End With
     MaxDelta = MySQLDatabase.Execute(SQL, "maxdelta")
 End Function
 
 'Add a link from an entity to another, through an entity_reference
-Public Sub JoinEntities(ByVal oEntity As DrupalEntity, ByVal oField)
+Public Sub JoinEntities(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalEntity)
     Dim sBundle As String
     sBundle = oEntity.Table
     
@@ -159,37 +177,41 @@ Public Sub JoinEntities(ByVal oEntity As DrupalEntity, ByVal oField)
     column_name = sField & "_id_target_id"
     
     Dim inSQL As SQLInsert
-    Set inSQL = New SQLInsert
-    inSQL.Table = table_name
-    inSQL.Fields = Array("bundle", "deleted", "entity_id", "revision_id", "langcode", "delta", column_name)
-    inSQL.Values = Array(str(sBundle), 0, lEntityId, lEntityId, str("und"), Delta, lFieldId)
+    Set inSQL = Create_SQLInsert
+    With inSQL
+        .Table = table_name
+        .Fields = Array("bundle", "deleted", "entity_id", "revision_id", "langcode", "delta", column_name)
+        .Values = Array(Str(sBundle), 0, lEntityId, lEntityId, Str("und"), Delta, lFieldId)
+    End With
     MySQLDatabase.Execute inSQL
 End Sub
 
 'Update the VBA object with values from the database using the id field
-Public Sub RefreshObject(ByRef oEntity As DrupalEntity)
+Public Sub RefreshObject(ByRef oEntity As iDrupalEntity)
     CreateFromId oEntity, oEntity.ID
 End Sub
 
 'Update values in the database using values in the VBA Object
-Public Sub Update(oEntity As DrupalEntity)
-    Dim MyUpdate As New SQLUpdate
-    MyUpdate.Table = oEntity.Table
-    
+Public Sub Update(oEntity As iDrupalEntity)
+    Dim MyUpdate As SQLUpdate
+    Set MyUpdate = Create_SQLUpdate
     Dim aFields As Variant
     aFields = oEntity.GetFields()
-    MyUpdate.Fields = GetFieldNames(aFields)
-    MyUpdate.Values = getFieldValues(aFields)
-    MyUpdate.AddWhere oEntity.IdField.FieldName, "=", oEntity.ID
+    With MyUpdate
+        .Table = oEntity.Table
+        .Fields = GetFieldNames(aFields)
+        .Values = getFieldValues(aFields)
+        .AddWhere oEntity.IdField.FieldName, oEntity.ID
+    End With
     MySQLDatabase.Execute MyUpdate
 End Sub
 
 'Create a object with values from the database, using a primary key
-Public Sub CreateFromId(ByRef oEntity As DrupalEntity, lId As Long)
-    Set sSQL = New SQLSelect
+Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
+    Set sSQL = Create_SQLSelect
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
-    sSQL.AddWhere oEntity.IdField.FieldName, "=", lId
+    sSQL.AddWhere oEntity.IdField.FieldName, lId
     ArrayOfValues = MyDatabase.Execute(sSQL)
     FieldList = oEntity.GetFields
     numfields = UBound(FieldList)
