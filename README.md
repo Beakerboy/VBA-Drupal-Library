@@ -40,14 +40,17 @@ A user will need database authentication credentials to access the database.
 
 ### Field Class
 The DrupaField represents a column in the database. It contains all the meta-information like the data type, length, column name, as well as the value. Inspiration comes from the field definition a module developer uses in a custom Entity file in Drupal.
- * .DataType = __type__  'boolean, string, password, decimal, integer, etc
+ * .DataType = __type__
  * .Length = __number__
  * .Value = __value__
  * .FieldName = __name__
  * .IdField = __boolean__
  * .TargetEntity __iDrupalEntity__
  * .Create __type__, __name__, _length_
- 
+
+The currently supported types are boolean, decimal, integer, password, string, and timestamp.
+The field class cannot be extended into a custom class at this time.
+
 #### Example
 ```vba
 'For a string with a length of 50:
