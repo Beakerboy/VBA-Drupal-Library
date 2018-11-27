@@ -61,10 +61,18 @@ After the Field is configured, a value can be added with ```vba oField.Value="Lo
 
 ### Entity Class
 The DrupalEntity class is a parent class for any other Entities, but can be used as-is. Custom Entities can extend this class and add custom properties and methods.
-
-
-
-
+* .Label = __name__
+* .Table = __dbtable__
+* .ID = __integer__
+* .LabelField = __custom-field__
+* .idField = __custom-field__
+* .AddField __DrupalField__
+* .CreateField __type__, __name__, _length_
+* .CreateEntityReference __filedname__, __DrupalEntity__
+* .SetValue __field__, __value__
+* .GetValue __field__
+* .SetTargetValue __field__, __value__
+* .GetFields
 
 An example of Extending the Base class is this Drupal User Entity. The id field is named 'uid' and the label field remains as the default 'name'. Two additional fields are added, 'pass' and 'timezone'. We add Properties for the fields, and ensure all the required interface methods are in place. 
 ```vba
