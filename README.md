@@ -46,13 +46,13 @@ The DrupaField represents a column in the database. It contains all the meta-inf
  * .FieldName = __name__
  * .IdField = __boolean__
  * .TargetEntity __iDrupalEntity__
- * .QuickCreate __type__, __name__, __length__
+ * .Create __type__, __name__, __length__
  
 #### Example
 ```vba
 'For a string with a length of 50:
 Set oField = Create_DrupalField
-oField.QuickCreate "string", "name", 50
+oField.Create "string", "name", 50
 ```
 After the Field is configured, a value can be added with ```vba oField.Value="Lorum Ipsum```. The value will be validated based on the chosen DataType.
 
