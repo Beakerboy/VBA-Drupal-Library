@@ -9,7 +9,6 @@ Features
  * [DrupalDatabase](#database-class)
  * [DrupalField](#field-class)
  * [DrupalEntity](#entity-class)
- * [DrupalNode](#node-class)
  
   Setup
 -----
@@ -41,38 +40,147 @@ A user will need database authentication credentials to access the database.
 
 ### Field Class
 The DrupaField represents a column in the database. It contains all the meta-information like the data type, length, column name, as well as the value. Inspiration comes from the field definition a module developer uses in a custom Entity file in Drupal.
+ * .DataType = __type__  'boolean, string, password, decimal, integer, etc
+ * .Length = __number__
+ * .Value = __value__
+ * .FieldName = __name__
+ * .IdField = __boolean__
+ * .TargetEntity __iDrupalEntity__
+ * .QuickCreate __type__, __name__, __length__
+ 
+#### Example
 ```vba
 'For a string with a length of 50:
-Set oField = New DrupalField
-oField.DataType = "string"
-oField.FieldName = "name"
-oField.Length = 50
+Set oField = Create_DrupalField
+oField.QuickCreate "string", "name", 50
 ```
+After the Field is configured, a value can be added with ```vba oField.Value="Lorum Ipsum```. The value will be validated based on the chosen DataType.
 
 ### Entity Class
 The DrupalEntity class is a parent class for any other Entities, but can be used as-is. Custom Entities can extend this class and add custom properties and methods.
 
-### Node Class
-The library contains a representation of Drupal's Node Entity as an example of how to extend the DrupalEntity
 
-To add a new node to your database:
+
+
+
+An example of Extending the Base class is this Drupal User Entity. The id field is named 'uid' and the label field remains as the default 'name'. Two additional fields are added, 'pass' and 'timezone'. We add Properties for the fields, and ensure all the required interface methods are in place. 
 ```vba
-'Create and populate a node object
-Set MyNode = New DrupalNode
-MyNode.Label = "New Node"
-MyNode.Status = False
+Implements iDrupalEntity
 
-'Look up the username for the user "mydrupalusername"
-Set MyUser = New DrupalUser
-MyUser.Name = "mydrupalusername"
-MyDatabase.getIdFromName MyUser
+Private oEntity As DrupalEntity
 
-MyNode.Uid = MyUser.Id
-MyDatabase.Insert MyNode         'Push the data to the database
+Private Sub Class_Initialize()
+    Set oEntity = Create_DrupalEntity
+    
+    Dim Uid As DrupalField
+    Set Uid = Create_DrupalField
+    With Uid
+        .FieldName = "uid"
+        .DataType = "int"
+        .IdField = True
+    End With
+    With oEntity
+        .Table = "users"
+        Set .IdField = Uid
+        .CreateField "password", "pass"
+        .CreateField "string", "timezone", 32
+    End With
+End Sub
+
+Public Property Get Timezone() As String
+    Timezone = oEntity.GetValue("timezone")
+End Property
+
+Public Property Let Timezone(sValue As String)
+    oEntity.SetValue "timezone", sValue
+End Property
+
+Public Property Let Password(sValue As String)
+    oEntity.SetValue "pass", sValue
+End Property
+
+Public Property Let ID(lValue As Long)
+    oEntity.ID = lValue
+End Property
+
+Public Property Get ID() As Long
+    ID = oEntity.ID
+End Property
+
+Public Property Let Label(sValue As String)
+    oEntity.Label = sValue
+End Property
+
+Public Property Get Label() As String
+    Label = oEntity.Label
+End Property
+
+Public Property Get Table() As String
+    Table = oEntity.Table
+End Property
+
+Public Property Get iDrupalEntity_Table()
+    iDrupalEntity_Table = oEntity.Table
+End Property
+
+Public Property Get iDrupalEntity_ID() As Long
+    iDrupalEntity_ID = oEntity.ID
+End Property
+
+Public Property Let iDrupalEntity_ID(lValue As Long)
+    oEntity.ID = lValue
+End Property
+
+Public Property Let iDrupalEntity_Label(vValue As Variant)
+    oEntity.Label = vValue
+End Property
+
+Public Property Get iDrupalEntity_IdField()
+    Set iDrupalEntity_IdField = oEntity.IdField
+End Property
+
+Public Property Get iDrupalEntity_LabelField()
+    Set iDrupalEntity_LabelField = oEntity.LabelField
+End Property
+
+Public Property Get iDrupalEntity_Label()
+    iDrupalEntity_Label = oEntity.Label
+End Property
+
+Public Function iDrupalEntity_GetFields()
+    iDrupalEntity_GetFields = oEntity.GetFields
+End Function
+```
+Alternatively, the DrupalEntity class can be used as is. This is sufficient if you do not desire or require custom functions or properties. This Node object has an id field named 'nid', a label field named 'title', a status field, and an entity reference to a user.
+```vba
+    Dim DrupalNode As DrupalEntity
+    Dim Nid As DrupalField
+    Dim Title As DrupalField
+    Dim UserEntity As New DrupalUser
+    
+    Set MyObject = Create_DrupalEntity
+    Set Nid = Create_DrupalField
+    Set Title = Create_DrupalField
+    Set UserEntity = New DrupalUser
+    
+    With Nid
+        .FieldName = "nid"
+        .IdField = True
+        .DataType = "int"
+    End With
+    
+    With Title
+        .FieldName = "title"
+        .DataType = "string"
+        .Length = 255
+    End With
+    
+    With MyObject
+        .Table = "node"
+        Set .IdField = Nid
+        Set .LabelField = Title
+        .CreateEntityReference "uid", UserEntity
+        .CreateField "boolean", "status"
+    End With
 ```
 
-The library also is able to attach entities together if their entity_reference is confugured to allow multiple values
-
-```vba
-MyDatabase.JoinEntities MyNode SomeCustomEntity    ''creates an entry in the node__somecustomentity_id table
-```
