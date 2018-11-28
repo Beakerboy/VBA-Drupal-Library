@@ -57,7 +57,7 @@ The field class cannot be extended into a custom class at this time.
 Set oField = Create_DrupalField
 oField.Create "string", "name", 50
 ```
-After the Field is configured, a value can be added with ```vba oField.Value="Lorum Ipsum```. The value will be validated based on the chosen DataType.
+After the Field is configured, a value can be added with ```oField.Value="Lorum Ipsum```. The value will be validated based on the chosen DataType.
 
 ### Entity Class
 The DrupalEntity class is a parent class for any other Entities, but can be used as-is. Custom Entities can extend this class and add custom properties and methods.
