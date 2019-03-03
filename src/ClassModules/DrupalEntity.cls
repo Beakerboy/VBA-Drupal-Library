@@ -59,7 +59,7 @@ Public Property Let Table(sValue As String)
 End Property
 
 Public Property Let ID(lValue As Long)
-   oId.Value = lValue
+    oId.Value = lValue
 End Property
 
 Public Property Set LabelField(oValue As DrupalField)
