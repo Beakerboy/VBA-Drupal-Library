@@ -208,6 +208,10 @@ End Sub
 
 'Create a object with values from the database, using a primary key
 Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
+    Dim sSql As SQLSelect
+    Dim ArrayOfValues As Variant
+    Dim FieldList As Variant
+    Dim numfields As Integer
     Set sSQL = Create_SQLSelect
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
