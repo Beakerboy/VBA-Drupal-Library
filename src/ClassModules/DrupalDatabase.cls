@@ -223,6 +223,9 @@ Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
     Dim Item As DrupalField
     For counter = 0 To numfields
         Set Item = FieldList(counter)
+        If IsNull(ArrayOfValues(counter, 0)) Then
+            ArrayOfValues(counter, 0) = ""
+        End If
         Item.Value = ArrayOfValues(counter, 0)
     Next counter
 End Sub
