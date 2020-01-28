@@ -16,13 +16,14 @@ Implements iDrupalEntity
 Private sTable As String        'The table name
 Private oId As DrupalField      'Primary Key
 Private oLabel As DrupalField   'The entity name
-
+Private noLabel As Boolean
 Private dFields As Dictionary   'An array of entity fields. This currently only
                                 'supports base fields.
 
 '***************************CONSTRUCTOR****************************************
 Private Sub Class_Initialize()
     Set dFields = New Dictionary
+    noLabel = False
     InitializeFields
 End Sub
 
@@ -91,6 +92,9 @@ Public Property Get IdField() As DrupalField
     Set IdField = oId
 End Property
 '******************************METHODS*****************************************
+Public Sub noLabel()
+    noLabel = True
+End Sub
 Public Sub SetValue(sFieldName As String, vValue)
     dFields(sFieldName).Value = vValue
 End Sub
@@ -131,17 +135,26 @@ Public Function CreateEntityReference(FieldName As String, TargetEntity As iDrup
     AddField NewField
 End Function
 
-'return All Fields except the ID field
+' Function: GetFields
+'
+' Get an array of all fields in the entity
 Public Function GetFields() As Variant
     Dim Number_Fields As Long
     Number_Fields = dFields.count
     
     Dim FieldArray() As DrupalField
     ReDim FieldArray(Number_Fields)
-    Set FieldArray(0) = oLabel
-    Dim key As Variant
     Dim i As Long
-    i = 1
+    i = 0
+    If noLabel = False Then
+        ReDim FieldArray(Number_Fields)
+        Set FieldArray(i) = oLabel
+        i = i + 1
+    Else
+        ReDim FieldArray(Number_Fields - 1)
+    End If
+    Dim key As Variant
+    
     For Each key In dFields.Keys
         Set FieldArray(i) = dFields(key)
         i = i + 1
