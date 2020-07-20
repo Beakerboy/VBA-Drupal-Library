@@ -10,3 +10,8 @@ End Function
 Public Function Create_DrupalEntity() As DrupalEntity
     Set Create_DrupalEntity = New DrupalEntity
 End Function
+
+Public Function Create_DrupalTaxonomy() As DrupalTaxonomy
+    Set Create_DrupalTaxonomy = New DrupalTaxonomy
+End Function
+
