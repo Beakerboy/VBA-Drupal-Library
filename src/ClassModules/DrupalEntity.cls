@@ -16,14 +16,14 @@ Implements iDrupalEntity
 Private sTable As String        'The table name
 Private oId As DrupalField      'Primary Key
 Private oLabel As DrupalField   'The entity name
-Private noLabel As Boolean
+Private bnoLabel As Boolean
 Private dFields As Dictionary   'An array of entity fields. This currently only
                                 'supports base fields.
 
 '***************************CONSTRUCTOR****************************************
 Private Sub Class_Initialize()
     Set dFields = New Dictionary
-    noLabel = False
+    bnoLabel = False
     InitializeFields
 End Sub
 
@@ -93,7 +93,7 @@ Public Property Get IdField() As DrupalField
 End Property
 '******************************METHODS*****************************************
 Public Sub noLabel()
-    noLabel = True
+    bnoLabel = True
 End Sub
 Public Sub SetValue(sFieldName As String, vValue)
     dFields(sFieldName).Value = vValue
@@ -146,7 +146,7 @@ Public Function GetFields() As Variant
     ReDim FieldArray(Number_Fields)
     Dim i As Long
     i = 0
-    If noLabel = False Then
+    If bnoLabel = False Then
         ReDim FieldArray(Number_Fields)
         Set FieldArray(i) = oLabel
         i = i + 1
@@ -194,3 +194,4 @@ End Property
 Public Function iDrupalEntity_GetFields()
     iDrupalEntity_GetFields = GetFields()
 End Function
+
