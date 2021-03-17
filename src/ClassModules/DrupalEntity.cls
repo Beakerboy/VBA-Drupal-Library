@@ -129,7 +129,7 @@ End Sub
 
 Public Function CreateEntityReference(FieldName As String, TargetEntity As iDrupalEntity)
     Dim NewField As New DrupalField
-    NewField.QuickLoad "entity_reference", FieldName
+    NewField.Create "entity_reference", FieldName
     Set NewField.TargetEntity = TargetEntity
     'If ForeignEntity.ID is set, should NewField.Value = ForeignEntity.ID?
     AddField NewField
