@@ -72,12 +72,29 @@ Public Property Get IdField() As Boolean
     IdField = bIdField
 End Property
 
+'*************************** FUNCTIONS ****************************************
+
+' Function: Create
+' Define a new field. Run this after the constructor.
+'
+' Parameters:
+'    DataType - Type of data to be stored in the field; boolean, decimal, string, or timestamp
+'    FieldName - Name of the field
+'    Length - Size of the field
 Public Sub Create(DataType, FieldName, Optional Length As Integer = 50)
     sFieldName = FieldName
     sType = DataType
     iLength = Length
 End Sub
 
+' Function: Validate
+' Verifies that the value is valid for the field type
+'
+' Parameters:
+'    vValue - The field value
+'
+' Returns:
+' A sanitized value
 Private Function Validate(vValue)
     Select Case sType
         Case Is = "boolean"
