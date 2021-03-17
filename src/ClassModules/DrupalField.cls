@@ -72,7 +72,7 @@ Public Property Get IdField() As Boolean
     IdField = bIdField
 End Property
 
-Public Sub QuickLoad(DataType, FieldName, Optional Length As Integer = 50)
+Public Sub Create(DataType, FieldName, Optional Length As Integer = 50)
     sFieldName = FieldName
     sType = DataType
     iLength = Length
