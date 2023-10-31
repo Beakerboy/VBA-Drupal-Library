@@ -1,7 +1,7 @@
 VBA Drupal Library
 =====================
 
-[![Build Status](https://travis-ci.org/Beakerboy/VBA-Drupal-Library.svg?branch=master)](https://travis-ci.org/Beakerboy/VBA-Drupal-Library)
+[![Lint VBA](https://github.com/Beakerboy/VBA-Drupal-Library/actions/workflows/lint_vba.yml/badge.svg?branch=master)](https://github.com/Beakerboy/VBA-Drupal-Library/actions/workflows/lint_vba.yml)
 
 ### Interact with Drupal Entities in VBA
 This Library allows a user to easily move data between excel and a database running the Drupal CMS
