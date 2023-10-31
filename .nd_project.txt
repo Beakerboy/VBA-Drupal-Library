@@ -8,8 +8,8 @@
 # Project Information
 # ------------------------------------------------------------------------
 
-Title: VBA SQL Library
-Subtitle: Object-based Database Interaction for VBA. Create SQL Statements with VBA objects instead of string concatination.
+Title: VBA Drupal Library
+Subtitle: Easily push data from excel spreadsheets into a database configured for the Drupal CMS
 
 Copyright: Kevin Nowaczyk
 
