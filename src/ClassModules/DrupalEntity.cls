@@ -211,6 +211,10 @@ Public Property Get iDrupalEntity_LabelField()
     Set iDrupalEntity_LabelField = oLabel
 End Property
 
+Public Function iDrupalEntity_Clone()
+    iDrupalEntity_Clone = Clone()
+End Function
+
 Public Property Get iDrupalEntity_Label()
     iDrupalEntity_Label = oLabel.Value
 End Property
