@@ -211,7 +211,7 @@ Public Property Get iDrupalEntity_LabelField()
 End Property
 
 Public Function iDrupalEntity_Clone()
-    iDrupalEntity_Clone = Clone()
+    Set iDrupalEntity_Clone = Clone()
 End Function
 
 Public Property Get iDrupalEntity_Label()
