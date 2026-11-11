@@ -92,6 +92,29 @@ Public Property Get IdField() As DrupalField
     Set IdField = oId
 End Property
 '******************************METHODS*****************************************
+
+' Function: Clone
+' Create a structural clone
+'
+' Returns:
+' A copy of the structure
+Public Function Clone() As DrupalEntity
+    Dim oReturn As DrupalEntity
+    Set oReturn = New DrupalEntity
+
+    oReturn.Table = sTable
+    Set oReturn.LabelField = oLabel
+
+    Dim FieldArray() As DrupalField
+    FieldArray = Me.GetFields()
+    ' FieldArray(0) is the label, so skip it
+    Dim i As Long
+    For i = 1 To UBound(FieldArray)
+        oReturn.AddField FieldArray(i).Clone
+    Next i
+    Set Clone = oReturn
+End Function
+
 Public Sub noLabel()
     bnoLabel = True
 End Sub
@@ -186,6 +209,10 @@ End Property
 Public Property Get iDrupalEntity_LabelField()
     Set iDrupalEntity_LabelField = oLabel
 End Property
+
+Public Function iDrupalEntity_Clone()
+    Set iDrupalEntity_Clone = Clone()
+End Function
 
 Public Property Get iDrupalEntity_Label()
     iDrupalEntity_Label = oLabel.Value

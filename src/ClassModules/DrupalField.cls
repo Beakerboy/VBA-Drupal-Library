@@ -87,6 +87,26 @@ Public Sub Create(DataType, FieldName, Optional Length As Integer = 50)
     iLength = Length
 End Sub
 
+' Function: Clone
+' Create a clone of Me
+'
+' Returns:
+' An exact copy
+Public Function Clone() As DrupalField
+    Dim oReturn As DrupalField
+    Set oReturn = New DrupalField
+
+    With oReturn
+        .DataType = sType
+        .Length = iLength
+        .FieldName = sFieldName
+        .IdField = bIdField
+        .Value = vValue
+    End With
+    Set oReturn.TargetEntity = oTarget
+    Set Clone = oReturn
+End Function
+
 ' Function: Validate
 ' Verifies that the value is valid for the field type
 '
