@@ -100,10 +100,10 @@ Public Function Clone() As DrupalField
         .DataType = sType
         .Length = iLength
         .FieldName = sFieldName
-        .TargetEntity = oTarget
         .IdField = bIdField
         .Value = vValue
     End With
+    Set oReturn.TargetEntity = oTarget
     Set Clone = oReturn
 End Function
 
