@@ -54,6 +54,10 @@ Public Property Get iDrupalEntity_Label()
     iDrupalEntity_Label = oEntity.Label
 End Property
 
+Public Function iDrupalEntity_Clone()
+    iDrupalEntity_Clone = oEntity.Clone()
+End Function
+
 Public Function iDrupalEntity_GetFields()
     iDrupalEntity_GetFields = oEntity.GetFields
 End Function
