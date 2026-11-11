@@ -102,10 +102,8 @@ Public Function Clone() As DrupalEntity
     Dim oReturn As DrupalEntity
     Set oReturn = New DrupalEntity
 
-    With oReturn
-        .Table = sTable
-        .LabelField = oLabel
-    End With
+    oReturn.Table = sTable
+    Set oReturn.LabelField = oLabel
 
     Dim FieldArray() As DrupalField
     FieldArray = Me.GetFields()
@@ -116,6 +114,7 @@ Public Function Clone() As DrupalEntity
     Next i
     Set Clone = oReturn
 End Function
+
 Public Sub noLabel()
     bnoLabel = True
 End Sub
