@@ -177,6 +177,59 @@ Public Sub JoinEntities(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalE
     MySQLDatabase.Execute inSQL
 End Sub
 
+' Function: GetChildren
+' Get the children of an entity from a one-to-many relationship
+'
+' Returns:
+' A copy of the structure
+Public Function GetChildren(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalEntity) As iDrupalEntity()
+    Dim sBundle As String
+    sBundle = oEntity.Table
+
+    Dim sChildTable As String
+    sChildTable = oField.Table
+    
+    Dim sField As String
+    sField = oField.Table
+    
+    Dim lFieldId As Long
+    lFieldId = oField.ID
+    
+    Dim lEntityId As Long
+    lEntityId = oEntity.ID
+
+    Dim join_table_name As String
+    join_table_name = sBundle & "__" & sField & "_id"
+    Dim column_name As String
+    column_name = sField & "_id_target_id"
+
+    Dim SQL As SQLSelect
+    Set SQL = Create_SQLSelect
+    With SQL
+        .AddTable oEntity.Table, "e"
+        .InnerJoin join_table_name, "jtn", "jtn.entity_id=e.id AND e.id=" & lEntityId
+        .InnerJoin sChildTable, "c", "jtn." & column_name & "=c.id"
+        .Fields = Array("c.id")
+    End With
+
+    'An array of Long
+    Dim dResults As Variant
+    dResults = MySQLDatabase.Execute(SQL)
+
+    Dim oResults() As iDrupalEntity
+
+    Dim NewField As iDrupalEntity
+    ReDim oResults(LBound(dResults, 2) To UBound(dResults, 2))
+    Dim i As Long
+    For i = LBound(dResults, 2) To UBound(dResults, 2)
+        Set NewField = oField.Clone()
+        NewField.ID = dResults(0, i)
+        Me.RefreshObject NewField
+        Set oResults(i) = NewField
+    Next i
+    GetChildren = oResults
+End Function
+
 ' Sub: RefreshObject
 ' Update the VBA object with values from the database using the id field
 Public Sub RefreshObject(ByRef oEntity As iDrupalEntity)
