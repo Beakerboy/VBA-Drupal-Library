@@ -7,6 +7,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'***************************DRUPAL FIELD CLASS********************************
+'Implements the Drupal Field Object in VBA
+'If more types are implemented they should each become a new class
+'
+'*********************************VARIABLES************************************
 Private sType As String
 Private iLength As Integer
 Private vValue As Variant
@@ -72,20 +77,7 @@ Public Property Get IdField() As Boolean
     IdField = bIdField
 End Property
 
-'*************************** FUNCTIONS ****************************************
-
-' Function: Create
-' Define a new field. Run this after the constructor.
-'
-' Parameters:
-'    DataType - Type of data to be stored in the field; boolean, decimal, string, or timestamp
-'    FieldName - Name of the field
-'    Length - Size of the field
-Public Sub Create(DataType, FieldName, Optional Length As Integer = 50)
-    sFieldName = FieldName
-    sType = DataType
-    iLength = Length
-End Sub
+'******************************METHODS*****************************************
 
 ' Function: Clone
 ' Create a clone of Me
@@ -106,6 +98,19 @@ Public Function Clone() As DrupalField
     Set oReturn.TargetEntity = oTarget
     Set Clone = oReturn
 End Function
+
+' Sub: Create
+' A simple initialization method
+'
+' Parameters:
+'    DataType - The field type
+'    FieldName - The field name
+'    Length - The field length
+Public Sub Create(DataType, FieldName, Optional Length As Integer = 50)
+    sFieldName = FieldName
+    sType = DataType
+    iLength = Length
+End Sub
 
 ' Function: Validate
 ' Verifies that the value is valid for the field type
