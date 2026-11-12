@@ -224,7 +224,7 @@ End Sub
 ' Get the children of an entity from a one-to-many relationship
 '
 ' Returns:
-' A copy of the structure
+' An array of children entities
 Public Function GetChildren(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalEntity) As iDrupalEntity()
     Dim sBundle As String
     sBundle = oEntity.Table
