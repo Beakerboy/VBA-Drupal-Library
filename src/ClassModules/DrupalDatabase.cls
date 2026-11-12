@@ -8,8 +8,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 '***************************DRUPAL DATABASE CLASS******************************
-'Provides methods for manupulating Drupal Entities with VBA
-'
+' Class: DrupalDatabase
+' Provides methods for manupulating Drupal Entities with VBA
 Option Explicit
 '*********************************VARIABLES************************************
 Private MySQLDatabase As SQLDatabase
@@ -20,26 +20,38 @@ Private Sub Class_Initialize()
 End Sub
 
 '***************************LET PROPERTIES*************************************
+' Property: DSN
+' Set the data source name for the database
 Public Property Let DSN(sValue As String)
     MySQLDatabase.DSN = sValue
 End Property
 
+' Property: DBType
+' Set the type of the database
 Public Property Let DBType(sValue As String)
     MySQLDatabase.DBType = sValue
 End Property
 
+' Property: Username
+' Set the connection user name
 Public Property Let Username(sValue As String)
     MySQLDatabase.Username = sValue
 End Property
 
+' Property: Username
+' Set the connection password
 Public Property Let Password(sValue As String)
     MySQLDatabase.Password = sValue
 End Property
 
+' Property: Recordset
+' Dependancy Injection of the Recordset class
 Public Property Set Recordset(MyRecordset As iSQLRecordset)
     Set MySQLDatabase.Recordset = MyRecordset
 End Property
 
+' Property: Connection
+' Dependancy Injection of the Connection class
 Public Property Set Connection(MyConnection As iSQLConnection)
     Set MySQLDatabase.Connection = MyConnection
 End Property
@@ -47,7 +59,11 @@ End Property
 
 '******************************METHODS*****************************************
 
-'Create a new record in the database using values from the class object
+' Sub: Insert
+' Create a new record in the database using values from the class object
+'
+' Parameters:
+'      oEntity - The entity to add to the database
 Public Sub Insert(ByRef oEntity As iDrupalEntity)
     Dim inSQL As SQLInsert
     Set inSQL = Create_SQLInsert
@@ -61,7 +77,14 @@ Public Sub Insert(ByRef oEntity As iDrupalEntity)
     oEntity.ID = MySQLDatabase.InsertGetNewId(inSQL, oEntity.IdField.FieldName)
 End Sub
 
-'Create an array of field names from the array of DrupalField objects
+' Function: GetFieldNames
+' Create an array of field names from the array of DrupalField objects
+'
+' Parameters:
+'      aFields - The entity to add to the database
+'
+' Returns:
+'      An array of strings
 Private Function GetFieldNames(aFields) As Variant
     Dim numfields As Integer
     numfields = UBound(aFields)
@@ -78,8 +101,15 @@ Private Function GetFieldNames(aFields) As Variant
     GetFieldNames = ReturnArray
 End Function
 
-'Create an array of field values from the array of DrupalField objects.
-'Sanitize the data to prepare it for the database.
+' Function: getFieldValues
+' Create an array of field values from the array of DrupalField objects.
+' Sanitize the data to prepare it for the database.
+'
+' Parameters:
+'      aFields - The entity to add to the database
+'
+' Returns:
+'      An array of various data types
 Private Function getFieldValues(aFields)
     Dim numfields As Integer
     numfields = UBound(aFields)
@@ -128,8 +158,12 @@ Private Function getFieldValues(aFields)
     getFieldValues = ReturnArray
 End Function
 
-'Using the provided object's .Label property, look up the primary key ID value. For cases where
-'the name is a unique identifier.
+' Sub: GetIdFromName
+' Using the provided object's .Label property, look up the primary key ID value. For cases where
+' the name is a unique identifier.
+'
+' Parameters:
+'      oEntity - The labeled entity to populate
 Public Sub GetIdFromName(ByRef oEntity As iDrupalEntity)
     Dim SQL As SQLSelect
     Set SQL = Create_SQLSelect
