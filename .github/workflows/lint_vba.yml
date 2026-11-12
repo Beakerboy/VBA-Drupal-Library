@@ -18,6 +18,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - name: Lint
-      uses: Vba-actions/lint-vba@dev
+      uses: Vba-actions/lint-vba@v1
       with:
         path: './src'
