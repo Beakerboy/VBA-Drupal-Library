@@ -16,16 +16,8 @@ jobs:
         python-version: ["3.11"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v7
+    - name: Lint
+      uses: Vba-actions/lint-vba@v1
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install antlr4-tools
-        wget https://raw.githubusercontent.com/Beakerboy/VBA_Tokenizer/ANTLR/VbaLint
-        chmod +x VbaLint
-    - name: Lint with antlr
-      run: |
-        ./VbaLint
+        path: './src'
