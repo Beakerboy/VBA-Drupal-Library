@@ -35,6 +35,14 @@ Public Property Get Label()
 
 End Property
 
+Public Function Clone()
+
+End Function
+
 Public Function GetFields()
 
 End Function
+
+Public Sub AddField(ByVal oField As DrupalField)
+
+End Sub

@@ -91,36 +91,70 @@ End Property
 Public Property Get IdField() As DrupalField
     Set IdField = oId
 End Property
+
 '******************************METHODS*****************************************
+
+
+' Function: Clone
+' Create a structural clone
+'
+' Returns:
+' A copy of the structure
+Public Function Clone() As DrupalEntity
+    Dim oReturn As DrupalEntity
+    Set oReturn = New DrupalEntity
+
+    oReturn.Table = sTable
+    Set oReturn.LabelField = oLabel
+
+    Dim FieldArray() As DrupalField
+    FieldArray = Me.GetFields()
+    ' FieldArray(0) is the label, so skip it
+    ' Should instead check of bnoLabel is true or false.
+    Dim i As Long
+    For i = 1 To UBound(FieldArray)
+        oReturn.AddField FieldArray(i).Clone
+    Next i
+    Set Clone = oReturn
+End Function
+
 Public Sub noLabel()
     bnoLabel = True
 End Sub
+
+' Sub: SetValue
+' Set the value of a field
+'
+' Parameters:
+'    sFieldName - The name of the field
+'    vValue - The value to set the field to
 Public Sub SetValue(sFieldName As String, vValue)
     dFields(sFieldName).Value = vValue
 End Sub
 
+' Function: GetValue
+' Get the value of a field
+'
+' Parameters:
+'    sFieldName - The name of the field
+'
+' Returrns:
+' The value of the field
 Public Function GetValue(sFieldName As String)
     GetValue = dFields(sFieldName).Value
 End Function
 
+' Sub: SetTargetValue
+' Set the value of an entity reference
 Public Sub SetTargetValue(sFieldName As String, vValue As Variant)
     dFields(sFieldName).TargetEntity.Label = vValue
 End Sub
 
-'WIP
-'Create a new Entity from an array of values.
-'For example, from the results of a Select Query
-'Public Sub CreateFromArray(oEntity, ArrayOfValues)
-'    FieldList = oEntity.GetFields
-'    numfields = UBound(FieldList)
-'    Dim counter As Integer
-'    Dim Item As DrupalField
-'    For counter = 0 To numfields
-'        Set Item = FieldList(counter)
-'        Item.Value = ArrayOfValues(counter)
-'    Next counter
-'End Sub
-
+' Sub: AddField
+' Add a new field to the entity
+'
+' Parameters:
+'    oField - The new field
 Public Sub AddField(ByVal oField As DrupalField)
     Dim FieldName As String
     FieldName = oField.FieldName
@@ -136,14 +170,14 @@ Public Function CreateEntityReference(FieldName As String, TargetEntity As iDrup
 End Function
 
 ' Function: GetFields
-'
 ' Get an array of all fields in the entity
+'
+' Returns: An array of DrupalField objects
 Public Function GetFields() As Variant
     Dim Number_Fields As Long
     Number_Fields = dFields.count
     
     Dim FieldArray() As DrupalField
-    ReDim FieldArray(Number_Fields)
     Dim i As Long
     i = 0
     If bnoLabel = False Then
@@ -153,14 +187,15 @@ Public Function GetFields() As Variant
     Else
         ReDim FieldArray(Number_Fields - 1)
     End If
+
     Dim key As Variant
-    
     For Each key In dFields.Keys
         Set FieldArray(i) = dFields(key)
         i = i + 1
     Next key
     GetFields = FieldArray
 End Function
+
 
 '***************************Interface Methods**********************************
 Public Property Get iDrupalEntity_Table()
@@ -191,7 +226,14 @@ Public Property Get iDrupalEntity_Label()
     iDrupalEntity_Label = oLabel.Value
 End Property
 
+Public Function iDrupalEntity_Clone()
+    Set iDrupalEntity_Clone = Clone()
+End Function
+
 Public Function iDrupalEntity_GetFields()
     iDrupalEntity_GetFields = GetFields()
 End Function
 
+Public Sub iDrupalEntity_AddField(ByVal oField As DrupalField)
+    AddField (oField)
+End Sub

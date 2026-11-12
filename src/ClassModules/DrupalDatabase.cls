@@ -7,8 +7,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'***************************DRUPAL DATABASE CLASS******************************
 ' Class: DrupalDatabase
-'Provides methods for manupulating Drupal Entities with VBA
+' Provides methods for manupulating Drupal Entities with VBA
 Option Explicit
 '*********************************VARIABLES************************************
 Private MySQLDatabase As SQLDatabase
@@ -19,33 +20,50 @@ Private Sub Class_Initialize()
 End Sub
 
 '***************************LET PROPERTIES*************************************
+' Property: DSN
+' Set the data source name for the database
 Public Property Let DSN(sValue As String)
     MySQLDatabase.DSN = sValue
 End Property
 
+' Property: DBType
+' Set the type of the database
 Public Property Let DBType(sValue As String)
     MySQLDatabase.DBType = sValue
 End Property
 
+' Property: Username
+' Set the connection user name
 Public Property Let Username(sValue As String)
     MySQLDatabase.Username = sValue
 End Property
 
+' Property: Username
+' Set the connection password
 Public Property Let Password(sValue As String)
     MySQLDatabase.Password = sValue
 End Property
 
+' Property: Recordset
+' Dependancy Injection of the Recordset class
 Public Property Set Recordset(MyRecordset As iSQLRecordset)
     Set MySQLDatabase.Recordset = MyRecordset
 End Property
 
+' Property: Connection
+' Dependancy Injection of the Connection class
 Public Property Set Connection(MyConnection As iSQLConnection)
     Set MySQLDatabase.Connection = MyConnection
 End Property
 
+
 '******************************METHODS*****************************************
+
 ' Sub: Insert
 ' Create a new record in the database using values from the class object
+'
+' Parameters:
+'      oEntity - The entity to add to the database
 Public Sub Insert(ByRef oEntity As iDrupalEntity)
     Dim inSQL As SQLInsert
     Set inSQL = Create_SQLInsert
@@ -61,6 +79,12 @@ End Sub
 
 ' Function: GetFieldNames
 ' Create an array of field names from the array of DrupalField objects
+'
+' Parameters:
+'      aFields - The entity to add to the database
+'
+' Returns:
+'      An array of strings
 Private Function GetFieldNames(aFields) As Variant
     Dim numfields As Integer
     numfields = UBound(aFields)
@@ -77,9 +101,15 @@ Private Function GetFieldNames(aFields) As Variant
     GetFieldNames = ReturnArray
 End Function
 
-' Function: GetFieldValues
+' Function: getFieldValues
 ' Create an array of field values from the array of DrupalField objects.
 ' Sanitize the data to prepare it for the database.
+'
+' Parameters:
+'      aFields - The entity to add to the database
+'
+' Returns:
+'      An array of various data types
 Private Function getFieldValues(aFields)
     Dim numfields As Integer
     numfields = UBound(aFields)
@@ -131,7 +161,9 @@ End Function
 ' Sub: GetIdFromName
 ' Using the provided object's .Label property, look up the primary key ID value. For cases where
 ' the name is a unique identifier.
-' Should this be renamed to SetIdFromName? We are not returning anything.
+'
+' Parameters:
+'      oEntity - The labeled entity to populate
 Public Sub GetIdFromName(ByRef oEntity As iDrupalEntity)
     Dim SQL As SQLSelect
     Set SQL = Create_SQLSelect
@@ -145,8 +177,19 @@ Public Sub GetIdFromName(ByRef oEntity As iDrupalEntity)
     oEntity.ID = MySQLDatabase.Execute(SQL, IdField.FieldName)
 End Sub
 
-' Sub: JoinEntities
-' Add a link from an entity to another, through an entity_reference
+'Look up the largest delta value that currently exists in the database for a given entity_id
+Private Function MaxDelta(sTable As String, lEntityId As Long) As Long
+    Dim SQL As SQLSelect
+    Set SQL = Create_SQLSelect
+    With SQL
+        .Table = sTable
+        .AddField "CASE WHEN max(delta) IS NULL THEN -1 ELSE max(delta) END", "maxdelta"
+        .AddWhere "entity_id", lEntityId
+    End With
+    MaxDelta = MySQLDatabase.Execute(SQL, "maxdelta")
+End Function
+
+'Add a link from an entity to another, through an entity_reference
 Public Sub JoinEntities(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalEntity)
     Dim sBundle As String
     sBundle = oEntity.Table
@@ -177,14 +220,66 @@ Public Sub JoinEntities(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalE
     MySQLDatabase.Execute inSQL
 End Sub
 
-' Sub: RefreshObject
-' Update the VBA object with values from the database using the id field
+' Function: GetChildren
+' Get the children of an entity from a one-to-many relationship
+'
+' Returns:
+' A copy of the structure
+Public Function GetChildren(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalEntity) As iDrupalEntity()
+    Dim sBundle As String
+    sBundle = oEntity.Table
+
+    Dim sChildTable As String
+    sChildTable = oField.Table
+    
+    Dim sField As String
+    sField = oField.Table
+    
+    Dim lFieldId As Long
+    lFieldId = oField.ID
+    
+    Dim lEntityId As Long
+    lEntityId = oEntity.ID
+
+    Dim join_table_name As String
+    join_table_name = sBundle & "__" & sField & "_id"
+    Dim column_name As String
+    column_name = sField & "_id_target_id"
+
+    Dim SQL As SQLSelect
+    Set SQL = Create_SQLSelect
+    With SQL
+        .AddTable oEntity.Table, "e"
+        .InnerJoin join_table_name, "jtn", "jtn.entity_id=e.id AND e.id=" & lEntityId
+        .InnerJoin sChildTable, "c", "jtn." & column_name & "=c.id"
+        .Fields = Array("c.id")
+    End With
+
+    'An array of Long
+    Dim dResults As Variant
+    dResults = MySQLDatabase.Execute(SQL)
+
+    Dim oResults() As iDrupalEntity
+
+    Dim NewField As iDrupalEntity
+    ReDim oResults(LBound(dResults, 2) To UBound(dResults, 2))
+    Dim i As Long
+    For i = LBound(dResults, 2) To UBound(dResults, 2)
+        Set NewField = oField.Clone()
+        NewField.ID = dResults(0, i)
+        Me.RefreshObject NewField
+        Set oResults(i) = NewField
+    Next i
+    GetChildren = oResults
+End Function
+
+
+'Update the VBA object with values from the database using the id field
 Public Sub RefreshObject(ByRef oEntity As iDrupalEntity)
     CreateFromId oEntity, oEntity.ID
 End Sub
 
-' Sub: Update
-' Update values in the database using values in the VBA Object
+'Update values in the database using values in the VBA Object
 Public Sub Update(oEntity As iDrupalEntity)
     Dim MyUpdate As SQLUpdate
     Set MyUpdate = Create_SQLUpdate
@@ -199,41 +294,24 @@ Public Sub Update(oEntity As iDrupalEntity)
     MySQLDatabase.Execute MyUpdate
 End Sub
 
-'Sub: CreateFromId
-' Create an object with values from the database, using a primary key
+'Create a object with values from the database, using a primary key
 Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
-    Dim sSql As SQLSelect
-    Dim ArrayOfValues As Variant
-    Dim FieldList As Variant
-    Dim numfields As Integer
+    Dim sSQL As SQLSelect
     Set sSQL = Create_SQLSelect
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
     sSQL.AddWhere oEntity.IdField.FieldName, lId
-    ArrayOfValues = MyDatabase.Execute(sSQL)
+    ArrayOfValues = MySQLDatabase.Execute(sSQL)
     FieldList = oEntity.GetFields
     numfields = UBound(FieldList)
     Dim counter As Integer
     Dim Item As DrupalField
     For counter = 0 To numfields
         Set Item = FieldList(counter)
-        If IsNull(ArrayOfValues(counter, 0)) Then
-            ArrayOfValues(counter, 0) = ""
-        End If
         Item.Value = ArrayOfValues(counter, 0)
     Next counter
 End Sub
 
-'**********************PRIVATE METHODS*****************************************
-' Function: MaxDelta
-' Look up the largest delta value that currently exists in the database for a given entity_id
-Private Function MaxDelta(sTable As String, lEntityId As Long) As Long
-    Dim SQL As SQLSelect
-    Set SQL = Create_SQLSelect
-    With SQL
-        .Table = sTable
-        .AddField "CASE WHEN max(delta) IS NULL THEN -1 ELSE max(delta) END", "maxdelta"
-        .AddWhere "entity_id", lEntityId
-    End With
-    MaxDelta = MySQLDatabase.Execute(SQL, "maxdelta")
+Public Function Execute(oSQL As iSQLQuery, Optional return_column = "")
+    Execute = MySQLDatabase.Execute(oSQL, return_column)
 End Function
