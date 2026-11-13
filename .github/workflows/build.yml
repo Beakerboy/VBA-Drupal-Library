@@ -26,9 +26,8 @@ jobs:
         uses: actions/checkout@v7
       - name: Generate the artifacts
         uses: Vba-actions/build-excel-addin@v1
-      - name: Upload the artifacts
-        uses: skx/github-action-publish-binaries@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v4
         with:
-          args: 'Addin.xlam'
+          name: Addin
+          path: Addin.xlam
