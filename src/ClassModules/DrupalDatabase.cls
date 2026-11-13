@@ -294,20 +294,27 @@ Public Sub Update(oEntity As iDrupalEntity)
     MySQLDatabase.Execute MyUpdate
 End Sub
 
-'Create a object with values from the database, using a primary key
+'Sub: CreateFromId
+' Create an object with values from the database, using a primary key
 Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
-    Dim sSQL As SQLSelect
+    Dim sSql As SQLSelect
+    Dim ArrayOfValues As Variant
+    Dim FieldList As Variant
+    Dim numfields As Integer
     Set sSQL = Create_SQLSelect
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
     sSQL.AddWhere oEntity.IdField.FieldName, lId
-    ArrayOfValues = MySQLDatabase.Execute(sSQL)
+    ArrayOfValues = MyDatabase.Execute(sSQL)
     FieldList = oEntity.GetFields
     numfields = UBound(FieldList)
     Dim counter As Integer
     Dim Item As DrupalField
     For counter = 0 To numfields
         Set Item = FieldList(counter)
+        If IsNull(ArrayOfValues(counter, 0)) Then
+            ArrayOfValues(counter, 0) = ""
+        End If
         Item.Value = ArrayOfValues(counter, 0)
     Next counter
 End Sub
