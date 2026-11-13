@@ -305,7 +305,7 @@ Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
     sSQL.AddWhere oEntity.IdField.FieldName, lId
-    ArrayOfValues = MyDatabase.Execute(sSQL)
+    ArrayOfValues = MySQLDatabase.Execute(sSQL)
     FieldList = oEntity.GetFields
     numfields = UBound(FieldList)
     Dim counter As Integer
