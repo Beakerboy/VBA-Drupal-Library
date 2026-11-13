@@ -294,8 +294,12 @@ Public Sub Update(oEntity As iDrupalEntity)
     MySQLDatabase.Execute MyUpdate
 End Sub
 
-'Sub: CreateFromId
+' Sub: CreateFromId
 ' Create an object with values from the database, using a primary key
+'
+' Parameters:
+'      oEntity - The labeled entity to populate
+'      lId - The promary Key ID to use
 Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
     Dim sSql As SQLSelect
     Dim ArrayOfValues As Variant
