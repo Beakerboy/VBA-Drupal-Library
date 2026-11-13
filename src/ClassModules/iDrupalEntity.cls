@@ -7,6 +7,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+' Interface: iDrupalEntity
+' The common interface for Drupal Entities
+
 Public Property Get Table()
 
 End Property

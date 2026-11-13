@@ -224,7 +224,7 @@ End Sub
 ' Get the children of an entity from a one-to-many relationship
 '
 ' Returns:
-' A copy of the structure
+' An array of children entities
 Public Function GetChildren(ByVal oEntity As iDrupalEntity, ByVal oField As iDrupalEntity) As iDrupalEntity()
     Dim sBundle As String
     sBundle = oEntity.Table
@@ -294,9 +294,17 @@ Public Sub Update(oEntity As iDrupalEntity)
     MySQLDatabase.Execute MyUpdate
 End Sub
 
-'Create a object with values from the database, using a primary key
+' Sub: CreateFromId
+' Create an object with values from the database, using a primary key
+'
+' Parameters:
+'      oEntity - The labeled entity to populate
+'      lId - The promary Key ID to use
 Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
-    Dim sSQL As SQLSelect
+    Dim sSql As SQLSelect
+    Dim ArrayOfValues As Variant
+    Dim FieldList As Variant
+    Dim numfields As Integer
     Set sSQL = Create_SQLSelect
     sSQL.Fields = GetFieldNames(oEntity.GetFields)
     sSQL.Table = oEntity.Table
@@ -308,6 +316,9 @@ Public Sub CreateFromId(ByRef oEntity As iDrupalEntity, lId As Long)
     Dim Item As DrupalField
     For counter = 0 To numfields
         Set Item = FieldList(counter)
+        If IsNull(ArrayOfValues(counter, 0)) Then
+            ArrayOfValues(counter, 0) = ""
+        End If
         Item.Value = ArrayOfValues(counter, 0)
     Next counter
 End Sub

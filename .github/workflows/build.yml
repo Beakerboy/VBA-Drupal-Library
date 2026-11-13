@@ -1,0 +1,32 @@
+name: Handle Release
+
+on:
+  release:
+    types: [created]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  generate:
+    name: Create release-artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Generate the artifacts
+        uses: Vba-actions/build-excel-addin@dev
+      - name: Upload PDF file
+        uses: actions/upload-artifact@v7
+        with:
+          name: Addin
+          path: Addin.xlam
