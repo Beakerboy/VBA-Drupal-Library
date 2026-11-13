@@ -26,8 +26,6 @@ jobs:
       - name: Generate the artifacts
         uses: Vba-actions/build-excel-addin@dev
       - name: Upload the artifacts
-        uses: skx/github-action-publish-binaries@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: 'Addin.xlam'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" "Addin.xlam" --clobber
